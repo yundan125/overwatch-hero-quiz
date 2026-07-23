@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#10151c">
+  <title>给守望先锋英雄起名字</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header no-print">
+      <a class="brand" href="#" id="brandHome" aria-label="返回游戏设置">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span>英雄名字分配实验</span>
+      </a>
+      <p class="header-note">离线运行 · 结果提交前不揭晓答案</p>
+    </header>
+
+    <main id="app" class="app" tabindex="-1">
+      <section id="setupScreen" class="screen setup-screen" aria-labelledby="gameTitle">
+        <div class="hero-heading">
+          <p class="eyebrow">FIRST IMPRESSION LAB</p>
+          <h1 id="gameTitle">给守望先锋英雄起名字</h1>
+          <p>根据英雄的长相，从全部名称中选出你觉得最适合他的名字，并写下理由。</p>
+        </div>
+
+        <section id="resumePanel" class="resume-panel hidden" aria-labelledby="resumeTitle">
+          <div>
+            <p class="eyebrow">未完成进度</p>
+            <h2 id="resumeTitle">发现一局未完成的游戏</h2>
+            <p id="resumeSummary"></p>
+          </div>
+          <div class="resume-actions">
+            <button id="continueButton" class="primary-button compact" type="button">继续游戏</button>
+            <button id="discardButton" class="ghost-button compact" type="button">放弃并开始新游戏</button>
+          </div>
+        </section>
+
+        <div id="saveWarning" class="notice warning hidden" role="alert"></div>
+
+        <form id="setupForm" class="setup-card">
+          <fieldset>
+            <legend>图片模式</legend>
+            <div class="segmented two-cols" role="radiogroup">
+              <label><input type="radio" name="imageMode" value="icon" checked><span><b>英雄图标</b><small>接近正方形的头像画面</small></span></label>
+              <label><input type="radio" name="imageMode" value="fullbody"><span><b>英雄全身照</b><small>固定高度的完整角色形象</small></span></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>英雄范围</legend>
+            <div class="segmented four-cols" role="radiogroup">
+              <label><input type="radio" name="roleFilter" value="all" checked><span>全部英雄</span></label>
+              <label><input type="radio" name="roleFilter" value="tank"><span>重装</span></label>
+              <label><input type="radio" name="roleFilter" value="damage"><span>输出</span></label>
+              <label><input type="radio" name="roleFilter" value="support"><span>支援</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>游戏方式</legend>
+            <div class="segmented two-cols" role="radiogroup">
+              <label><input type="radio" name="playStyle" value="single" checked><span><b>逐个填写</b><small>每次专注一位英雄</small></span></label>
+              <label><input type="radio" name="playStyle" value="list"><span><b>全部列表</b><small>在卡片中统一检查和编辑</small></span></label>
+            </div>
+          </fieldset>
+
+          <p id="gamePreview" class="game-preview" aria-live="polite"></p>
+          <div id="assetWarning" class="notice warning hidden" role="alert"></div>
+          <button class="primary-button" type="submit">开始分配名字</button>
+        </form>
+      </section>
+
+      <section id="gameScreen" class="screen game-screen hidden" aria-labelledby="gameScreenTitle">
+        <div class="game-header">
+          <div>
+            <p class="eyebrow">NAME ASSIGNMENT</p>
+            <h2 id="gameScreenTitle">凭第一印象分配名字</h2>
+          </div>
+          <button id="gameBackSetupButton" class="ghost-button compact no-print" type="button">返回设置</button>
+        </div>
+
+        <div class="game-metrics" aria-label="本局进度">
+          <div class="metric"><span>当前</span><strong id="progressPosition">第 1 / 1 位英雄</strong></div>
+          <div class="metric"><span>已完成</span><strong id="completedMetric">0</strong></div>
+          <div class="metric"><span>剩余名称</span><strong id="remainingMetric">0</strong></div>
+          <div class="metric"><span>图片</span><strong id="modeMetric">英雄图标</strong></div>
+          <div class="metric"><span>范围</span><strong id="roleMetric">全部英雄</strong></div>
+        </div>
+        <div class="progress-track" role="progressbar" aria-label="名字分配进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <section id="singleMode" class="single-mode">
+          <div class="single-layout">
+            <article class="visual-card">
+              <div id="singleImageStage" class="image-stage icon-mode" aria-busy="true">
+                <div class="stage-grid" aria-hidden="true"></div>
+                <img id="singleHeroImage" alt="待命名英雄图片" draggable="false">
+                <div id="singleImageStatus" class="image-status">正在载入本地图片…</div>
+              </div>
+              <div id="singleImageFault" class="image-fault hidden" role="alert">
+                <strong>图片加载失败</strong>
+                <p>主图片和备用图片都无法显示。你可以跳过这一位，最终结果会单独标记。</p>
+                <button id="skipHeroButton" class="secondary-button compact" type="button">跳过当前英雄</button>
+              </div>
+            </article>
+
+            <article class="assignment-card">
+              <div class="section-heading">
+                <div>
+                  <p class="step-label">从本局名称池中选择</p>
+                  <h3>你觉得他叫什么？</h3>
+                </div>
+                <span id="poolStatus" class="status-chip">仅显示未使用名称</span>
+              </div>
+
+              <label class="search-field" for="nameSearch">
+                <span>搜索中文名或英文名</span>
+                <input id="nameSearch" type="search" autocomplete="off" placeholder="输入部分名称快速筛选">
+              </label>
+              <p id="selectedNameStatus" class="selected-name-status" aria-live="polite">尚未选择名称</p>
+              <div id="namePool" class="name-pool" role="group" aria-label="可选择的英雄名称"></div>
+              <p id="emptySearch" class="empty-search hidden">没有符合搜索条件的可用名称。</p>
+
+              <label class="reason-field" for="reasonInput">
+                <span>为什么觉得他叫这个名字？</span>
+                <textarea id="reasonInput" maxlength="200" rows="5" placeholder="例如：看起来很神秘，感觉这个名字很适合他。"></textarea>
+              </label>
+              <p class="character-count"><span id="reasonCount">0</span> / 200 字</p>
+
+              <div class="single-actions">
+                <button id="confirmAssignmentButton" class="primary-button" type="button" disabled>确认并进入下一位</button>
+                <button id="previousButton" class="secondary-button" type="button">暂存并返回上一位</button>
+                <button id="overviewButton" class="ghost-button" type="button">查看当前分配表</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="listMode" class="list-mode hidden" aria-labelledby="listTitle">
+          <div class="list-toolbar no-print">
+            <div>
+              <h3 id="listTitle">全部英雄分配列表</h3>
+              <p>已保存的卡片会锁定；点击“编辑”可重新分配并释放旧名称。</p>
+            </div>
+            <label class="check-filter"><input id="incompleteOnly" type="checkbox"> 只看未完成</label>
+            <button id="listOverviewButton" class="ghost-button compact" type="button">查看当前分配表</button>
+          </div>
+          <div id="listCards" class="list-cards"></div>
+          <button id="listSubmitButton" class="primary-button list-submit" type="button" disabled>检查并提交全部结果</button>
+        </section>
+      </section>
+
+      <section id="resultScreen" class="screen result-screen hidden" aria-labelledby="resultTitle">
+        <header class="result-hero share-header">
+          <p class="eyebrow">FIRST IMPRESSION REPORT</p>
+          <h2 id="resultTitle">没玩过守望先锋的人看图猜名字</h2>
+          <p id="resultMeta"></p>
+        </header>
+
+        <div class="result-stats">
+          <div><span>本局英雄</span><strong id="totalResultMetric">0</strong></div>
+          <div><span>猜对</span><strong id="correctResultMetric">0</strong></div>
+          <div><span>猜错</span><strong id="wrongResultMetric">0</strong></div>
+          <div><span>跳过</span><strong id="skippedResultMetric">0</strong></div>
+          <div><span>正确率</span><strong id="accuracyResultMetric">0%</strong></div>
+        </div>
+
+        <div class="result-controls no-print" data-hide-share>
+          <div class="control-group" role="group" aria-label="筛选结果">
+            <span>筛选</span>
+            <button class="filter-button is-active" type="button" data-result-filter="all" aria-pressed="true">全部</button>
+            <button class="filter-button" type="button" data-result-filter="correct" aria-pressed="false">只看猜对</button>
+            <button class="filter-button" type="button" data-result-filter="wrong" aria-pressed="false">只看猜错</button>
+          </div>
+          <label class="sort-control">排序
+            <select id="resultSort">
+              <option value="order">按本局顺序</option>
+              <option value="wrongFirst">猜错优先</option>
+              <option value="role">按真实职责</option>
+              <option value="name">按真实中文名称</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="resultList" class="result-list"></div>
+        <p id="emptyResultFilter" class="empty-result hidden">当前筛选条件下没有结果。</p>
+
+        <div class="result-actions no-print">
+          <button id="playAgainButton" class="primary-button" type="button">再玩一次</button>
+          <button id="backSetupButton" class="secondary-button" type="button">返回设置</button>
+          <button id="switchModeButton" class="ghost-button" type="button">切换图片模式再玩</button>
+          <button id="copyResultButton" class="ghost-button" type="button">复制文字结果</button>
+          <button id="printResultButton" class="ghost-button" type="button">打印或保存为 PDF</button>
+          <button id="exportResultButton" class="ghost-button" type="button">导出结果 JSON</button>
+          <button id="importResultButton" class="ghost-button" type="button">导入结果 JSON</button>
+          <button id="shareModeButton" class="ghost-button share-toggle" type="button" aria-pressed="false">进入分享长图模式</button>
+          <input id="importFileInput" class="sr-only" type="file" accept="application/json,.json">
+        </div>
+      </section>
+    </main>
+
+    <footer id="copyrightFooter">
+      <p>仅用于个人学习和非商业娱乐。《守望先锋》及相关英雄、美术素材版权归 Blizzard Entertainment 所有。</p>
+      <p>资料与图片整理自春语实验室守望先锋中文 Wiki、Overwatch Fandom Wiki 及其标注来源。本项目与 Blizzard Entertainment、春语实验室和 Fandom 无官方关联。</p>
+    </footer>
+  </div>
+
+  <dialog id="overviewDialog" class="app-dialog" aria-labelledby="overviewTitle" aria-modal="true">
+    <div class="dialog-heading">
+      <div>
+        <p class="eyebrow">分配检查</p>
+        <h2 id="overviewTitle">当前分配表</h2>
+      </div>
+      <button class="icon-button" type="button" data-close-dialog="overviewDialog" aria-label="关闭当前分配表">×</button>
+    </div>
+    <p>这里不会显示真实名称或猜测是否正确。</p>
+    <div class="table-scroller">
+      <table class="assignment-table">
+        <thead><tr><th>图片</th><th>玩家选择</th><th>理由</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody id="overviewBody"></tbody>
+      </table>
+    </div>
+    <div class="dialog-actions">
+      <button class="secondary-button" type="button" data-close-dialog="overviewDialog">返回检查</button>
+      <button id="overviewSubmitButton" class="primary-button" type="button">检查并提交全部结果</button>
+    </div>
+  </dialog>
+
+  <dialog id="submitDialog" class="app-dialog confirm-dialog" aria-labelledby="submitDialogTitle" aria-modal="true">
+    <p class="eyebrow">答案即将揭晓</p>
+    <h2 id="submitDialogTitle">提交后将显示所有英雄的真实名称，确定提交吗？</h2>
+    <p>提交后本局答案会锁定，不能继续修改。</p>
+    <div class="dialog-actions">
+      <button id="cancelSubmitButton" class="secondary-button" type="button">返回检查</button>
+      <button id="confirmSubmitButton" class="primary-button" type="button">确认提交</button>
+    </div>
+  </dialog>
+
+  <dialog id="confirmDialog" class="app-dialog confirm-dialog" aria-labelledby="confirmDialogTitle" aria-modal="true">
+    <h2 id="confirmDialogTitle">确认操作</h2>
+    <p id="confirmDialogMessage"></p>
+    <div class="dialog-actions">
+      <button id="genericCancelButton" class="secondary-button" type="button">取消</button>
+      <button id="genericConfirmButton" class="primary-button" type="button">确认</button>
+    </div>
+  </dialog>
+
+  <div id="liveRegion" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+  <script src="heroes.js"></script>
+  <script src="core.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
