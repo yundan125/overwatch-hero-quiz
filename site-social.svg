@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+	<title id="title">CloudLight</title>
+	<desc id="desc">Projects, game tools and development</desc>
+	<defs>
+		<pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+			<path d="M48 0H0V48" fill="none" stroke="#2a3a4e" stroke-width="1" />
+		</pattern>
+	</defs>
+	<rect width="1200" height="630" fill="#111b27" />
+	<rect width="1200" height="630" fill="url(#grid)" opacity="0.55" />
+	<rect x="86" y="82" width="1028" height="466" rx="32" fill="#172536" stroke="#3a4b60" />
+	<circle cx="132" cy="126" r="7" fill="#607086" />
+	<circle cx="158" cy="126" r="7" fill="#607086" />
+	<circle cx="184" cy="126" r="7" fill="#607086" />
+	<text x="128" y="325" fill="#f7f9fc" font-family="system-ui, sans-serif" font-size="112" font-weight="700" letter-spacing="8">CloudLight</text>
+	<text x="134" y="393" fill="#8fa4bc" font-family="system-ui, sans-serif" font-size="27" font-weight="600" letter-spacing="5">PROJECTS · GAME TOOLS · DEVELOPMENT</text>
+	<rect x="884" y="430" width="184" height="60" rx="14" fill="#e7f0fb" />
+	<text x="916" y="469" fill="#19477f" font-family="system-ui, sans-serif" font-size="22" font-weight="700">269332.xyz</text>
+</svg>

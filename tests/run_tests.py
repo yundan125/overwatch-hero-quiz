@@ -133,7 +133,19 @@ def static_web_tests() -> None:
     check("aria-modal=\"true\"" in html, "对话框缺少 aria-modal")
     check("aria-live" in html, "缺少 aria-live")
     check(re.search(r"\son\w+\s*=", html, re.I) is None, "HTML 包含内联事件")
-    check("http://" not in html and "https://" not in html, "HTML 包含外部资源 URL")
+    allowed_external_urls = (
+        "https://269332.xyz/",
+        "https://269332.xyz/tools/",
+        "https://269332.xyz/projects/",
+        "https://269332.xyz/about/",
+        "https://269332.xyz/overwatch-hero-quiz/",
+        "https://269332.xyz/overwatch-hero-quiz/site-social.svg",
+        "https://github.com/yundan125",
+        "https://github.com/yundan125/overwatch-hero-quiz",
+    )
+    external_urls = re.findall(r'https?://[^"\s<>]+', html)
+    check(all(url in allowed_external_urls for url in external_urls), f"HTML 包含未批准的外部 URL：{external_urls}")
+    check(re.search(r"<(?:script|img)\b[^>]+src=[\"']https?://", html, re.I) is None, "HTML 运行时资源依赖外部 URL")
     check("fetch(" not in script, "运行时代码使用 fetch")
     check("eval(" not in script and "eval(" not in core, "JavaScript 包含 eval")
     check("buildOptions" not in script and "buildOptions" not in core, "仍保留四选一选项生成逻辑")
